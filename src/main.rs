@@ -1,10 +1,12 @@
 mod api;
 mod app;
 mod ui;
+mod input;
 
-use app::{App, ViewMode};
+use app::App;
+use input::{Action, KeyMap};
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
+    event::{self, DisableMouseCapture, EnableMouseCapture},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -41,6 +43,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Create app and run it
     let mut app = App::new(&stash_url);
     
+    // Load key configuration
+    let key_map = if let Ok(config) = input::KeyConfig::load_from_file("config.toml") {
+        config.to_key_map()
+    } else {
+        // Use default key bindings if config file not found
+        KeyMap::new()
+    };
+    
     // Initial data fetch
     if let Err(e) = app.fetch_system_status().await {
         eprintln!("Failed to connect to Stash: {}", e);
@@ -51,7 +61,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     
     // Run the app
-    let res = run_app(&mut terminal, &mut app).await;
+    let res = run_app(&mut terminal, &mut app, key_map).await;
 
     // Restore terminal
     disable_raw_mode()?;
@@ -72,6 +82,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 async fn run_app<B: ratatui::backend::Backend>(
     terminal: &mut Terminal<B>,
     app: &mut App,
+    key_map: KeyMap,
 ) -> Result<(), Box<dyn Error>> {
     let mut last_tick = Instant::now();
     let tick_rate = Duration::from_millis(250);
@@ -84,49 +95,48 @@ async fn run_app<B: ratatui::backend::Backend>(
             .unwrap_or_else(|| Duration::from_secs(0));
 
         if crossterm::event::poll(timeout)? {
-            if let Event::Key(key) = event::read()? {
-                match key.code {
-                    KeyCode::Char('q') => return Ok(()),
-                    KeyCode::Tab => {
-                        if app.view_mode == app::ViewMode::List {
-                            app.next_tab();
-                            app.fetch_current_data().await?;
-                        }
-                    },
-                    KeyCode::BackTab => {
-                        if app.view_mode == app::ViewMode::List {
-                            app.previous_tab();
-                            app.fetch_current_data().await?;
-                        }
-                    },
-                    KeyCode::Down => app.next_item(),
-                    KeyCode::Up => app.previous_item(),
-                    KeyCode::PageDown => {
-                        if app.view_mode == app::ViewMode::List {
-                            app.next_page().await?;
-                        }
-                    },
-                    KeyCode::PageUp => {
-                        if app.view_mode == app::ViewMode::List {
-                            app.previous_page().await?;
-                        }
-                    },
-                    KeyCode::Enter => app.toggle_detail_view(),
-                    KeyCode::Esc => {
-                        if app.view_mode == app::ViewMode::Detail {
-                            app.toggle_detail_view();
-                        }
-                    },
-                    KeyCode::Char('r') => {
-                        if app.view_mode == app::ViewMode::List {
-                            app.fetch_current_data().await?;
-                        }
-                    },
-                    KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                        return Ok(())
-                    },
-                    _ => {}
-                }
+            let event = event::read()?;
+            let action = key_map.handle_key_event(event);
+            
+            // Handle the action based on current app state
+            match action {
+                Action::Quit => return Ok(()),
+                Action::NextTab => {
+                    if app.view_mode == app::ViewMode::List {
+                        app.next_tab();
+                        app.fetch_current_data().await?;
+                    }
+                },
+                Action::PreviousTab => {
+                    if app.view_mode == app::ViewMode::List {
+                        app.previous_tab();
+                        app.fetch_current_data().await?;
+                    }
+                },
+                Action::NextItem => app.next_item(),
+                Action::PreviousItem => app.previous_item(),
+                Action::NextPage => {
+                    if app.view_mode == app::ViewMode::List {
+                        app.next_page().await?;
+                    }
+                },
+                Action::PreviousPage => {
+                    if app.view_mode == app::ViewMode::List {
+                        app.previous_page().await?;
+                    }
+                },
+                Action::ToggleDetailView => app.toggle_detail_view(),
+                Action::Back => {
+                    if app.view_mode == app::ViewMode::Detail {
+                        app.toggle_detail_view();
+                    }
+                },
+                Action::Refresh => {
+                    if app.view_mode == app::ViewMode::List {
+                        app.fetch_current_data().await?;
+                    }
+                },
+                Action::Noop => {},
             }
         }
 

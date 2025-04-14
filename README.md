@@ -7,6 +7,7 @@ A terminal user interface for [Stash](https://github.com/stashapp/stash) built w
 - Browse scenes, performers, and tags in your Stash collection
 - Navigate through pages of content
 - Terminal-based interface for quick access to your media
+- Configurable key bindings
 
 ## Requirements
 
@@ -46,11 +47,13 @@ The application can be configured using:
 
 If not provided, it will use a default URL of `http://localhost:9999`.
 
-## Usage
+## Default Key Bindings
 
 - `Tab` / `Shift+Tab`: Switch between tabs
 - `↑` / `↓`: Navigate through items
 - `PageUp` / `PageDown`: Change pages
+- `Enter`: View item details
+- `Esc`: Return to list view
 - `r`: Refresh current view
 - `q` or `Ctrl+C`: Quit
 
@@ -61,7 +64,7 @@ This is a work in progress. Future features may include:
 - Detailed view of scenes, performers, and tags
 - Search functionality
 - Filtering options
-- Configuration file for server settings
+- Configuration file for server settings and key bindings
 - Authentication support
 
 ## License

@@ -1,0 +1,68 @@
+# Stash TUI Key Configuration
+
+# Quit the application
+[[quit]]
+key = "q"
+modifiers = []
+
+[[quit]]
+key = "c"
+modifiers = ["CONTROL"]
+
+# Navigate between tabs
+[[next_tab]]
+key = "Tab"
+modifiers = []
+
+[[previous_tab]]
+key = "BackTab"
+modifiers = ["SHIFT"]
+
+# Navigate items in a list
+[[next_item]]
+key = "Down"
+modifiers = []
+
+[[next_item]]
+key = "j"
+modifiers = []
+
+[[previous_item]]
+key = "Up"
+modifiers = []
+
+[[previous_item]]
+key = "k"
+modifiers = []
+
+# Navigate between pages
+[[next_page]]
+key = "PageDown"
+modifiers = []
+
+[[next_page]]
+key = "l"
+modifiers = []
+
+[[previous_page]]
+key = "PageUp"
+modifiers = []
+
+[[previous_page]]
+key = "h"
+modifiers = []
+
+# Toggle detail view
+[[toggle_detail]]
+key = "Enter"
+modifiers = []
+
+# Go back
+[[back]]
+key = "Esc"
+modifiers = []
+
+# Refresh current view
+[[refresh]]
+key = "r"
+modifiers = []
