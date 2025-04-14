@@ -1,35 +1,7 @@
-# Rust .gitignore file
-
-# Compiled files and executables
-/target/
+/target
 **/*.rs.bk
-
-# Debug artifacts
-*.pdb
-
-# Generated documentation
-/doc/
-
-# Dependency directories from Cargo
-.cargo-ok
-
-# Backup files from editors
-*~
-*.swp
-*.swo
-
-# Local configuration files
 Cargo.lock
-# Keep Cargo.lock for binary projects, remove it for library projects
-
-# IDE specific files
+.env
 .idea/
 .vscode/
-*.iml
-.DS_Store
-
-# Environment variables
-.env
-.env.local
-
-
+*.pdb
