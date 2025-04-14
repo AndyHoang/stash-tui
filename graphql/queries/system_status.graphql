@@ -1,0 +1,12 @@
+query SystemStatus {
+  systemStatus {
+    databaseSchema
+    status
+    os
+    workingDir
+    homeDir
+    configPath
+    databasePath
+    appSchema
+  }
+}

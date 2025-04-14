@@ -1,0 +1,470 @@
+# This is a simplified schema for Stash GraphQL API
+# You'll need to update this with the actual schema from your Stash instance
+
+type Query {
+  systemStatus: SystemStatus!
+  findScenes(
+    scene_filter: SceneFilterType
+    filter: FindFilterType
+    ids: [ID!]
+  ): FindScenesResultType!
+  findPerformers(
+    performer_filter: PerformerFilterType
+    filter: FindFilterType
+    ids: [ID!]
+  ): FindPerformersResultType!
+  findTags(
+    tag_filter: TagFilterType
+    filter: FindFilterType
+    ids: [ID!]
+  ): FindTagsResultType!
+}
+
+type SystemStatus {
+  databaseSchema: Int!
+  status: SystemStatusEnum!
+  os: String!
+  workingDir: String!
+  homeDir: String!
+  configPath: String
+  databasePath: String
+  appSchema: Int!
+  ffmpegPath: String
+  ffprobePath: String
+}
+
+enum SystemStatusEnum {
+  SETUP
+  NEEDS_MIGRATION
+  OK
+}
+
+type FindScenesResultType {
+  count: Int!
+  scenes: [Scene!]!
+}
+
+type Scene {
+  id: ID!
+  title: String
+  details: String
+  url: String
+  date: String
+  rating: Int
+  organized: Boolean!
+  o_counter: Int!
+  play_count: Int!
+  play_duration: Float!
+  resume_time: Float
+  last_played_at: Time
+  created_at: Time!
+  updated_at: Time!
+  files: [VideoFile!]!
+  paths: ScenePathsType!
+  scene_markers: [SceneMarker!]!
+  galleries: [Gallery!]!
+  studio: Studio
+  movies: [SceneMovie!]!
+  tags: [Tag!]!
+  performers: [Performer!]!
+  stash_ids: [StashID!]!
+  sceneStreams: [SceneStreamEndpoint!]!
+  interactive: Boolean!
+  interactive_speed: Int
+  captions: [VideoCaption!]!
+  duration: Int
+}
+
+type VideoFile {
+  id: ID!
+  path: String!
+  size: String!
+  duration: Float!
+  video_codec: String!
+  audio_codec: String!
+  width: Int!
+  height: Int!
+  frame_rate: Float!
+  bit_rate: Int!
+  fingerprints: [Fingerprint!]!
+}
+
+type ScenePathsType {
+  screenshot: String
+  preview: String
+  stream: String
+  webp: String
+  vtt: String
+  chapters_vtt: String
+  sprite: String
+  funscript: String
+  interactive_heatmap: String
+}
+
+type SceneMarker {
+  id: ID!
+  scene: Scene!
+  title: String!
+  seconds: Float!
+  primary_tag: Tag!
+  tags: [Tag!]!
+  created_at: Time!
+  updated_at: Time!
+  screenshot: String!
+  preview: String!
+  stream: String!
+}
+
+type Gallery {
+  id: ID!
+  title: String
+  date: String
+  url: String
+  details: String
+  rating: Int
+  organized: Boolean!
+  images: [Image!]!
+  cover: Image
+  studio: Studio
+  tags: [Tag!]!
+  performers: [Performer!]!
+  scenes: [Scene!]!
+  created_at: Time!
+  updated_at: Time!
+  files: [GalleryFile!]!
+  folder: GalleryFile
+  chapters: [GalleryChapter!]!
+}
+
+type Image {
+  id: ID!
+  title: String
+  rating: Int
+  organized: Boolean!
+  o_counter: Int!
+  visual_files: [VisualFile!]!
+  galleries: [Gallery!]!
+  studio: Studio
+  tags: [Tag!]!
+  performers: [Performer!]!
+  created_at: Time!
+  updated_at: Time!
+  paths: ImagePathsType!
+}
+
+type VisualFile {
+  id: ID!
+  path: String!
+  size: String!
+  width: Int!
+  height: Int!
+  fingerprints: [Fingerprint!]!
+}
+
+type ImagePathsType {
+  thumbnail: String
+  image: String
+}
+
+type GalleryFile {
+  id: ID!
+  path: String!
+  size: String!
+  mod_time: Time!
+  fingerprints: [Fingerprint!]!
+}
+
+type GalleryChapter {
+  id: ID!
+  title: String!
+  image_index: Int!
+  gallery: Gallery!
+  created_at: Time!
+  updated_at: Time!
+}
+
+type Studio {
+  id: ID!
+  name: String!
+  url: String
+  parent_studio: Studio
+  child_studios: [Studio!]!
+  image_path: String
+  scene_count: Int!
+  image_count: Int!
+  gallery_count: Int!
+  performer_count: Int!
+  movie_count: Int!
+  details: String
+  rating: Int
+  aliases: [String!]!
+  stash_ids: [StashID!]!
+  created_at: Time!
+  updated_at: Time!
+}
+
+type SceneMovie {
+  movie: Movie!
+  scene_index: Int
+}
+
+type Movie {
+  id: ID!
+  name: String!
+  aliases: String
+  duration: Int
+  date: String
+  rating: Int
+  director: String
+  synopsis: String
+  url: String
+  created_at: Time!
+  updated_at: Time!
+  front_image_path: String
+  back_image_path: String
+  scene_count: Int!
+  scenes: [Scene!]!
+  studio: Studio
+  tags: [Tag!]!
+  performers: [Performer!]!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+  aliases: [String!]!
+  image_path: String
+  scene_count: Int!
+  scene_marker_count: Int!
+  image_count: Int!
+  gallery_count: Int!
+  performer_count: Int!
+  movie_count: Int!
+  parent_tags: [Tag!]!
+  child_tags: [Tag!]!
+  description: String
+  created_at: Time!
+  updated_at: Time!
+}
+
+type Performer {
+  id: ID!
+  name: String!
+  url: String
+  gender: GenderEnum
+  twitter: String
+  instagram: String
+  birthdate: String
+  ethnicity: String
+  country: String
+  eye_color: String
+  height: String
+  measurements: String
+  fake_tits: String
+  career_length: String
+  tattoos: String
+  piercings: String
+  aliases: String
+  favorite: Boolean!
+  image_path: String
+  scene_count: Int!
+  image_count: Int!
+  gallery_count: Int!
+  movie_count: Int!
+  tags: [Tag!]!
+  stash_ids: [StashID!]!
+  rating: Int
+  details: String
+  death_date: String
+  hair_color: String
+  weight: Int
+  created_at: Time!
+  updated_at: Time!
+}
+
+enum GenderEnum {
+  MALE
+  FEMALE
+  TRANSGENDER_MALE
+  TRANSGENDER_FEMALE
+  INTERSEX
+  NON_BINARY
+}
+
+type StashID {
+  stash_id: String!
+  endpoint: String!
+}
+
+type SceneStreamEndpoint {
+  url: String!
+  mime_type: String!
+  label: String!
+}
+
+type VideoCaption {
+  language_code: String!
+  caption_type: String!
+}
+
+type Fingerprint {
+  type: String!
+  value: String!
+}
+
+scalar Time
+
+input FindFilterType {
+  q: String
+  page: Int
+  per_page: Int
+  sort: String
+  direction: SortDirectionEnum
+}
+
+enum SortDirectionEnum {
+  ASC
+  DESC
+}
+
+input SceneFilterType {
+  id: ID
+  title: String
+  details: String
+  url: String
+  date: String
+  rating: Int
+  organized: Boolean
+  o_counter: Int
+  play_count: Int
+  play_duration: Float
+  resume_time: Float
+  last_played_at: Time
+  created_at: Time
+  updated_at: Time
+  tag_count: Int
+  performer_count: Int
+  studio_id: ID
+  tags: MultiCriterionInput
+  performers: MultiCriterionInput
+  studios: MultiCriterionInput
+  movies: MultiCriterionInput
+  galleries: MultiCriterionInput
+  stash_id: StringCriterionInput
+  stash_id_endpoint: StashIDCriterionInput
+  duplicated: Boolean
+  interactive: Boolean
+  interactive_speed: IntCriterionInput
+  captions: StringCriterionInput
+  has_markers: Boolean
+  is_missing: String
+  path: StringCriterionInput
+  file_count: IntCriterionInput
+  duration: IntCriterionInput
+  phash: StringCriterionInput
+  has_phash: Boolean
+}
+
+input PerformerFilterType {
+  id: ID
+  name: String
+  filter_favorites: Boolean
+  birth_year: IntCriterionInput
+  age: IntCriterionInput
+  ethnicity: StringCriterionInput
+  country: StringCriterionInput
+  eye_color: StringCriterionInput
+  height: StringCriterionInput
+  measurements: StringCriterionInput
+  fake_tits: StringCriterionInput
+  career_length: StringCriterionInput
+  tattoos: StringCriterionInput
+  piercings: StringCriterionInput
+  aliases: StringCriterionInput
+  gender: GenderCriterionInput
+  is_missing: String
+  tags: MultiCriterionInput
+  tag_count: IntCriterionInput
+  scene_count: IntCriterionInput
+  image_count: IntCriterionInput
+  gallery_count: IntCriterionInput
+  movie_count: IntCriterionInput
+  stash_id: StringCriterionInput
+  stash_id_endpoint: StashIDCriterionInput
+  rating: IntCriterionInput
+  details: StringCriterionInput
+  death_year: IntCriterionInput
+  hair_color: StringCriterionInput
+  weight: IntCriterionInput
+  url: StringCriterionInput
+  instagram: StringCriterionInput
+  twitter: StringCriterionInput
+}
+
+input TagFilterType {
+  id: ID
+  name: String
+  aliases: StringCriterionInput
+  description: StringCriterionInput
+  is_missing: String
+  scene_count: IntCriterionInput
+  scene_marker_count: IntCriterionInput
+  image_count: IntCriterionInput
+  gallery_count: IntCriterionInput
+  performer_count: IntCriterionInput
+  movie_count: IntCriterionInput
+  parents: MultiCriterionInput
+  children: MultiCriterionInput
+}
+
+input MultiCriterionInput {
+  value: [ID!]
+  modifier: CriterionModifier!
+}
+
+input StringCriterionInput {
+  value: String!
+  modifier: CriterionModifier!
+}
+
+input IntCriterionInput {
+  value: Int!
+  modifier: CriterionModifier!
+}
+
+input StashIDCriterionInput {
+  endpoint: String!
+  stash_id: String!
+  modifier: CriterionModifier!
+}
+
+input GenderCriterionInput {
+  value: GenderEnum!
+  modifier: CriterionModifier!
+}
+
+enum CriterionModifier {
+  EQUALS
+  NOT_EQUALS
+  GREATER_THAN
+  LESS_THAN
+  IS_NULL
+  NOT_NULL
+  INCLUDES_ALL
+  INCLUDES
+  EXCLUDES
+  MATCHES_REGEX
+  NOT_MATCHES_REGEX
+  BETWEEN
+  NOT_BETWEEN
+}
+
+type FindPerformersResultType {
+  count: Int!
+  performers: [Performer!]!
+}
+
+type FindTagsResultType {
+  count: Int!
+  tags: [Tag!]!
+}

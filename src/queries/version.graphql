@@ -1,0 +1,8 @@
+query GetVersion {
+  version {
+    version
+    hash
+    build_time
+  }
+}
+

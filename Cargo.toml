@@ -1,0 +1,15 @@
+[package]
+name = "stash-tui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ratatui = "0.24.0"
+crossterm = "0.27.0"
+tokio = { version = "1.32.0", features = ["full"] }
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+graphql_client = "0.13.0"
+dotenv = "0.15.0"
