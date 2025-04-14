@@ -132,3 +132,75 @@ fn test_list_scenes() {
         }
     });
 }
+#[test]
+fn test_scene_streams() {
+    // Load environment variables from .env file
+    dotenv().ok();
+    
+    // Get Stash URL from environment variable or use default
+    let stash_url = env::var("STASH_URL")
+        .unwrap_or_else(|_| {
+            println!("STASH_URL environment variable not set, using default URL");
+            "http://localhost:9999".to_string()
+        });
+    
+    println!("Testing scene streams from Stash at: {}", stash_url);
+    
+    // Create a new runtime for async code
+    let rt = Runtime::new().unwrap();
+    
+    // Create a new StashClient
+    let client = StashClient::new(&stash_url);
+    
+    // Run the async test in the runtime
+    rt.block_on(async {
+        // Test listing scenes with stream information
+        match client.find_scenes(1, 5).await {
+            Ok(scenes_response) => {
+                println!("Successfully retrieved {} scenes", scenes_response.scenes.len());
+                
+                if scenes_response.scenes.is_empty() {
+                    println!("No scenes found to test streams");
+                    return;
+                }
+                
+                // Check if any scenes have stream information
+                let mut has_streams = false;
+                
+                for (i, scene) in scenes_response.scenes.iter().enumerate() {
+                    let title = scene.title.clone().unwrap_or_else(|| "Untitled".to_string());
+                    
+                    println!("Scene {}: {}", i + 1, title);
+                    
+                    // Check if scene_streams is present and not empty
+                    if let Some(streams) = &scene.scene_streams {
+                        println!("  - Found {} stream(s)", streams.len());
+                        
+                        for (j, stream) in streams.iter().enumerate() {
+                            let label = stream.label.clone().unwrap_or_else(|| "Unlabeled".to_string());
+                            let mime = stream.mime_type.clone().unwrap_or_else(|| "unknown".to_string());
+                            
+                            println!("    Stream {}: {} ({})", j + 1, label, mime);
+                            println!("    URL: {}", stream.url);
+                            
+                            has_streams = true;
+                        }
+                    } else {
+                        println!("  - No streams found for this scene");
+                    }
+                    
+                    println!(""); // Empty line for readability
+                }
+                
+                // Assert that at least one scene has streams
+                // Note: This might fail if your Stash server doesn't have any streams configured
+                // In that case, you might want to comment out this assertion
+                assert!(has_streams, "Expected at least one scene to have stream information. If your Stash server doesn't support streams, this test might fail.");
+                
+            },
+            Err(e) => {
+                panic!("Failed to retrieve scenes: {}", e);
+            }
+        }
+    });
+}

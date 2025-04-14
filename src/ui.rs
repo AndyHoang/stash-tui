@@ -76,6 +76,7 @@ fn draw_scenes(f: &mut Frame, app: &App, area: Rect) {
         .iter()
         .map(|scene| {
             let title = scene.title.clone().unwrap_or_else(|| "Untitled".to_string());
+            let code = scene.code.clone().map(|c| format!(" [{}]", c)).unwrap_or_else(|| "".to_string());
             let duration = scene.files.as_ref()
                 .and_then(|files| files.first())
                 .and_then(|file| file.duration)
@@ -83,7 +84,7 @@ fn draw_scenes(f: &mut Frame, app: &App, area: Rect) {
                 .unwrap_or_else(|| "".to_string());
             
             ListItem::new(Line::from(vec![
-                Span::raw(title),
+                Span::raw(format!("{}{}", title, code)),
                 Span::styled(duration, Style::default().fg(Color::Gray)),
             ]))
         })
@@ -220,8 +221,10 @@ fn draw_scene_detail(f: &mut Frame, app: &App, area: Rect) {
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(3),  // Title
+            Constraint::Length(3),  // ID and Code
             Constraint::Min(5),     // Details
             Constraint::Length(3),  // File info
+            Constraint::Length(5),  // Stream info
         ].as_ref())
         .split(area);
     
@@ -232,13 +235,24 @@ fn draw_scene_detail(f: &mut Frame, app: &App, area: Rect) {
         .style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD));
     f.render_widget(title_widget, chunks[0]);
     
+    // ID and Code
+    let id_code = format!(
+        "ID: {}\nCode: {}", 
+        scene.id,
+        scene.code.clone().unwrap_or_else(|| "N/A".to_string())
+    );
+    let id_code_widget = Paragraph::new(id_code)
+        .block(Block::default().title("Identifiers").borders(Borders::ALL))
+        .style(Style::default().fg(Color::White));
+    f.render_widget(id_code_widget, chunks[1]);
+    
     // Details
     let details = scene.details.clone().unwrap_or_else(|| "No details available".to_string());
     let details_widget = Paragraph::new(details)
         .block(Block::default().title("Details").borders(Borders::ALL))
         .style(Style::default().fg(Color::White))
         .wrap(ratatui::widgets::Wrap { trim: true });
-    f.render_widget(details_widget, chunks[1]);
+    f.render_widget(details_widget, chunks[2]);
     
     // File info
     let file_info = if let Some(files) = &scene.files {
@@ -278,7 +292,27 @@ fn draw_scene_detail(f: &mut Frame, app: &App, area: Rect) {
     let file_widget = Paragraph::new(file_info)
         .block(Block::default().title("File Information").borders(Borders::ALL))
         .style(Style::default().fg(Color::Gray));
-    f.render_widget(file_widget, chunks[2]);
+    f.render_widget(file_widget, chunks[3]);
+    
+    // Stream info
+    let stream_info = if let Some(streams) = &scene.scene_streams {
+        if !streams.is_empty() {
+            // Just show the first stream for simplicity
+            let stream = &streams[0];
+            let label = stream.label.clone().unwrap_or_else(|| "Direct Stream".to_string());
+            let mime = stream.mime_type.clone().unwrap_or_else(|| "unknown".to_string());
+            format!("Stream: {} ({})\nURL: {}", label, mime, stream.url)
+        } else {
+            "No stream information available".to_string()
+        }
+    } else {
+        "No stream information available".to_string()
+    };
+    
+    let stream_widget = Paragraph::new(stream_info)
+        .block(Block::default().title("Stream Information").borders(Borders::ALL))
+        .style(Style::default().fg(Color::Gray));
+    f.render_widget(stream_widget, chunks[4]);
 }
 
 fn draw_performer_detail(f: &mut Frame, app: &App, area: Rect) {

@@ -47,11 +47,28 @@ pub struct SystemStatusResponse {
 pub struct Scene {
     pub id: String,
     pub title: Option<String>,
+    pub code: Option<String>,
     pub details: Option<String>,
+    pub director: Option<String>,
+    pub url: Option<String>,
+    pub urls: Option<Vec<String>>,
     pub date: Option<String>,
     #[serde(rename = "rating100")]
     pub rating: Option<i32>,
+    pub organized: Option<bool>,
+    pub o_counter: Option<i32>,
+    pub interactive: Option<bool>,
+    pub interactive_speed: Option<i32>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+    pub last_played_at: Option<String>,
+    pub resume_time: Option<f64>,
+    pub play_duration: Option<f64>,
+    pub play_count: Option<i32>,
     pub files: Option<Vec<SceneFile>>,
+    pub scene_markers: Option<Vec<SceneMarker>>,
+    #[serde(rename = "sceneStreams")]
+pub scene_streams: Option<Vec<SceneStreamEndpoint>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -171,9 +188,14 @@ impl StashClient {
                 scenes {
                     id
                     title
+                    code
                     details
                     date
                     rating100
+                    organized
+                    o_counter
+                    interactive
+                    play_count
                     files {
                         size
                         duration
@@ -183,6 +205,11 @@ impl StashClient {
                         height
                         frame_rate
                         bit_rate
+                    }
+                    sceneStreams {
+                        url
+                        mime_type
+                        label
                     }
                 }
             }
@@ -335,4 +362,16 @@ impl StashClient {
 
         Err("Failed to parse tags response".into())
     }
+}
+#[derive(Debug, Deserialize)]
+pub struct SceneStreamEndpoint {
+    pub url: String,
+    pub mime_type: Option<String>,
+    pub label: Option<String>,
+}
+#[derive(Debug, Deserialize)]
+pub struct SceneMarker {
+    pub id: String,
+    pub title: String,
+    pub seconds: f64,
 }
